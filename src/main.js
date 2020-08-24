@@ -114,19 +114,21 @@ export default {
      * @param {number} newVolume
      * @return {Promise <number, (RangeError | Error)>}
      */
-    async setVolume(newVolume = 1.0) {
-      try {
-        const volume = await this.player.getVolume()
-        if (volume || volume === 0) {
-          this.prevVolume = volume
-          this.volume = newVolume
-          return await this.player.setVolume(newVolume)
-        }
-
-        return
-      } catch (error) {
-        vm.$emit('error', error, vm.player)
-      }
+    setVolume(newVolume = 1.0) {
+      return this.player.getVolume()
+        .then((volume) => {
+          if (volume || volume === 0) {
+            this.prevVolume = volume
+            this.volume = newVolume
+            return this.player.setVolume(newVolume)
+              .catch((error) => {
+                vm.$emit('error', error, vm.player)
+              })
+          }
+        })
+        .catch((error) => {
+          vm.$emit('error', error, vm.player)
+        })
     },
     setEvents() {
       const vm = this
