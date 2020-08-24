@@ -117,7 +117,7 @@ export default {
     async setVolume(newVolume = 1.0) {
       try {
         const volume = await this.player.getVolume()
-        if (volume !== undefined && volume !== null) {
+        if (volume || volume === 0) {
           this.prevVolume = volume
           this.volume = newVolume
           return await this.player.setVolume(newVolume)
