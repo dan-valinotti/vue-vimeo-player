@@ -90,22 +90,43 @@ export default {
     pause() {
       return this.player.pause()
     },
+    /**
+     * Sets Player volume to 0.
+     * @return {Promise <number, (RangeError | Error)>}
+     */
     mute() {
-      return this.setVolume(0);
+      return this.setVolume(0)
     },
+    /**
+     * If the video is muted, sets the Player volume
+     * to the last recorded volume level.
+     * @return {Promise <number, (RangeError | Error)>}
+     */
     unmute() {
-      return this.setVolume(prevVolume);
+      if (this.volume === 0) {
+        return this.setVolume(this.prevVolume)
+      }
     },
-    setVolume(newVolume = 1.0) {
-      return this.player.getVolume()
-        .then((volume) => {
-          this.volume = newVolume;
-          this.prevVolume = volume;
-          return this.player.setVolume(newVolume);
-        })
-        .catch((error) => {
-          vm.$emit('error', error, vm.player);
-        });
+    /**
+     * Records the current volume level as prevVolume, then
+     * sets the Player volume to the newVolume parameter value.
+     * 
+     * @param {number} newVolume
+     * @return {Promise <number, (RangeError | Error)>}
+     */
+    async setVolume(newVolume = 1.0) {
+      try {
+        const volume = await this.player.getVolume()
+        if (volume !== undefined && volume !== null) {
+          this.prevVolume = volume
+          this.volume = newVolume
+          return await this.player.setVolume(newVolume)
+        }
+
+        return
+      } catch (error) {
+        vm.$emit('error', error, vm.player)
+      }
     },
     setEvents() {
       const vm = this
